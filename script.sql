@@ -1,3 +1,8 @@
+//Desenvolvedor: Antonio Halyson 
+//email: halisonsc5@gmail.com
+//Data:16/12/2020 as 14:46
+//http://github.com/hscastro
+
 //cria a tabela clientes
 
 CREATE TABLE tb_clientes(

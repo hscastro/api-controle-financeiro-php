@@ -1,5 +1,9 @@
 <?php
-
+	//Desenvolvedor: Antonio Halyson 
+	//email: halisonsc5@gmail.com
+	//Data:16/12/2020 as 20:00
+    //http://github.com/hscastro
+    
     function validarCaracteres($str){
         
         $contador = 0;

@@ -1,4 +1,8 @@
 <?php
+	//Desenvolvedor: Antonio Halyson 
+	//email: halisonsc5@gmail.com
+	//Data:15/12/2020 as 10:21
+	//http://github.com/hscastro
 
 	require_once('Conexao.class.php');
 	require_once('Cliente.class.php');

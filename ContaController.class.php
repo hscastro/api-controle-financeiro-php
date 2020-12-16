@@ -1,5 +1,9 @@
 <?php
-
+	//Desenvolvedor: Antonio Halyson 
+	//email: halisonsc5@gmail.com
+	//Data:16/12/2020 as 14:46
+	//http://github.com/hscastro
+	
     require_once('Conexao.class.php');
     require_once('Cliente.class.php');
 	require_once('Conta.class.php');
@@ -97,8 +101,7 @@
 			$stmt->bindParam(':valor', $valor);
 			$stmt->bindParam(':id', $id, PDO::PARAM_INT);	
 			$stmt->execute();
-									
-			$this->conn = NULL;
+								
 
 			if($stmt != NULL){
 				
@@ -263,28 +266,27 @@
 		 }
 		 
 		//retorno os dados uma conta a partir do numero do 'CPF' do cliente
-		public function existsConta(Conta $conta){
+		public function existsConta($numero){
 			//sql para selecionar todos os clientes da base dados
-			$numero = $conta->getNumero();
-			$sql = "SELECT * FROM tb_contas AS c1 INNER JOIN  tb_clientes AS c2 
-					ON c1.cliente_id = c2.id AND c1.numero ='$numero'";
-		
+			$sql = "SELECT c1.ID as id, c1.NUMERO as numero,  
+					c1.VALOR as valor FROM tb_contas AS c1 INNER JOIN  tb_clientes AS c2 
+					ON c1.cliente_id = c2.id AND c1.numero ='$numero'";	
 
 			$stmt = $this->conn->prepare($sql);		   
-			$stmt->execute();
+			$stmt->execute();			
 			$NUMERO = 0;
-			$SALDO = 0;
-			 
+						 
 			//percorre a lista de registros cadastro no banco de dados
 			while($rows = $stmt->fetch(PDO::FETCH_ASSOC)) {
-				   $NUMERO = $rows['NUMERO'];
-				   $SALDO = $rows['VALOR'];
+				   $NUMERO = $rows['numero'];
 			}
 
-			if($numero === $NUMERO){		
+			if($numero === $NUMERO){	
+				
 				return true;
-			} 
-		
+			}
+			
+			return false;		
 		}	
 
 		//retorno os dados uma conta a partir do numero do 'CPF' do cliente
@@ -382,54 +384,57 @@
         }		
 
         //Transferências: Essa operação deverá realizar o débito do saldo de uma pessoa e realizar um crédito na outra pessoa.        
-        public function setTransferencias($numeroContaDebitada, $numeroContaBeneciado, $valor){
+        public function setTransferencias($numeroContaDebitada, $numeroContaBeneficiada, $valor){
 
-            //verifica se as contas existem na base de dados, caso existam retornara o valor true
-            if(existsConta($numeroContaBeneciado) AND existsConta($numeroContaDebitada)){
+			//verifica se as contas existem na base de dados, caso existam retornara o valor true
+            if($this->existsConta($numeroContaDebitada) &&  $this->existsConta($numeroContaBeneficiada)){
+  
+				 $retornoDebitada = $this->existsContaRetornaSaldo($numeroContaDebitada);
+				 $retornoBeneficiada = $this->existsContaRetornaSaldo($numeroContaBeneficiada);
+				 $saldoContaDebitada = $retornoDebitada->getSaldo();
+				 $saldoContaBeneficiada = $retornoBeneficiada->getSaldo();
+				 
 
-                //Em seguida será verificado se existe saldo na conta do transferente
-                if($numeroContaDebitada->getSaldo() <= $valor){
-                    $this->setNumero($numeroContaBeneciado);
-                    $this->setCredito($numeroContaBeneciado, $valor);
+				//Em seguida será verificado se existe saldo na conta do transferente
+				if($saldoContaDebitada >= $valor){
+				    //processa a retirdo do valor da conta a ser debitada				   
+				    $saldoContaDebitada -= $valor;
+				    $novoSaldoContaDebitada = $saldoContaDebitada;
+				    $retornoDebitada->setSaldo($novoSaldoContaDebitada);
 
-                    echo 'Transferência efetivada com sucesso!';
+				    $result_1 = false;
 
-                }else{
-                    echo 'O [VALOR] é maior que o salda em conta.';
-                }
+				    //Obs: Deve ser implementado aqui o begin transaction
+				    //para as duas operações sejam efetivadas na base de dados 
+				    $result_1 = $this->editar($retornoDebitada);
 
-            }else{
-                echo 'Conta (as) não existe (m) em nossa base de dados';
-            }
+					//processa o acrescimento a conta a ser creditada a transferência
+					$saldoContaBeneficiada += $valor;
+					$novoSaldoContaBeneficiado = $saldoContaBeneficiada;
+					$retornoBeneficiada->setSaldo($novoSaldoContaBeneficiado);
 
-        } 
+					$result_2 = false;
+					$result_2 = $this->editar($retornoBeneficiada);
+
+					//Finaliza a conexão com a base de dados
+					$this->conn = NULL;
+					
+					//commit nas duas operações 
+
+					if($result_1 && $result_2){
+						echo 'Operação [TRANSFERÊNCIA] efetivada com sucesso!';
+					}else{
+						//rollback, dê erro em uma das operaões
+						echo 'Erro na operação, favor consultar a gerência';
+					}
+				}
+			}
+
+		} 		
 		
 
 	}
 
-	//$cliente = new Cliente;
-	///$cliente->setNome('Maria da Silva');
-	//$cliente->setCpf('18194230202');
-	 $conta = new Conta;
-	// $dataAtual = date('y-m-d');
-	// $conta->setDataCadastro($dataAtual);
-	// $conta->setSaldo(8500.01);
-	//$conta = new Conta;
-	//$conta->setId(5);
-	$conta->setNumero('1923-2');
-	$valor = 100.00;
 	
-	$objet = new ContaController;
-	
-	//$res = $objet->listar();
-	//$res = $objet->buscarContaPorCpf($cliente->getCpf());
-	///$res = $objet->buscarContaPorNumero($conta->getNumero());
-	//$res = $objet->buscarClientePorNome($cliente->getNome());
-	//$res = $objet->existsConta($conta);
-	//$res = $objet->existsContaRetornaSaldo($conta->getNumero());
-	$res = $objet->setCredito($conta, $valor);
-	//$res = $objet->setDebito($conta, $valor);
-	//$res = $objet->editar($conta);
-	echo $res;
 ?>
 
