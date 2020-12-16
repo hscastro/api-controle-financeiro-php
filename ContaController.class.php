@@ -261,38 +261,71 @@
 			$resultado = json_encode($lista);
 			
 			return $resultado;		  		
-		 }		 
+		 }
+		 
+		//retorno os dados uma conta a partir do numero do 'CPF' do cliente
+		public function existsConta(Conta $conta){
+			//sql para selecionar todos os clientes da base dados
+			$numero = $conta->getNumero();
+			$sql = "SELECT * FROM tb_contas AS c1 INNER JOIN  tb_clientes AS c2 
+					ON c1.cliente_id = c2.id AND c1.numero ='$numero'";
+		
 
-		//retorno um cliente a partir do CPF
-		/*public function buscarPorCpf($cpf){
-			$sql = 'SELECT * FROM tb_clientes WHERE cpf LIKE :cpf';
-			$stmt = $this->conn->prepare($sql);
-			$stmt->bindParam(':cpf', $cpf);
+			$stmt = $this->conn->prepare($sql);		   
 			$stmt->execute();
- 
-			$lista = array();
-			$i = 0;
-			
+			$NUMERO = 0;
+			$SALDO = 0;
+			 
 			//percorre a lista de registros cadastro no banco de dados
-			while ($rows = $stmt->fetch(PDO::FETCH_ASSOC)) {
-				 $lista[$i] = [
-					 "ID" => $rows['ID'],
-					 "NOME" => $rows['NOME'],
-					 "CPF" => $rows['CPF'],
-					 "DATANASCIMENTO" => $rows['DATANASCIMENTO'],
-					 "EMAIL" => $rows['EMAIL'],
-				 ];
-				 $i++;
-			 }
- 
-			//finaliza a conexão com banco de dados
-			//$this->conn = NULL;
-			//retorno em formato json
-			$resultado = json_encode($lista);
-			
-			return $resultado;
-		}
+			while($rows = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				   $NUMERO = $rows['NUMERO'];
+				   $SALDO = $rows['VALOR'];
+			}
 
+			if($numero === $NUMERO){		
+				return true;
+			} 
+		
+		}	
+
+		//retorno os dados uma conta a partir do numero do 'CPF' do cliente
+		public function existsContaRetornaSaldo($numero){
+			//sql para selecionar todos os clientes da base dados
+			$sql = "SELECT * FROM tb_contas AS c1 INNER JOIN  tb_clientes AS c2 
+							ON c1.cliente_id = c2.id AND c1.numero ='$numero'";
+		
+
+			$stmt = $this->conn->prepare($sql);		   
+			$stmt->execute();
+			$NUMERO = 0;
+			$SALDO = 0;
+			 
+			//percorre a lista de registros cadastro no banco de dados
+			while($rows = $stmt->fetch(PDO::FETCH_ASSOC)) {
+				   $NUMERO = $rows['NUMERO'];
+				   $SALDO = $rows['VALOR'];
+			}
+
+			if($numero === $NUMERO){		
+				return $SALDO;
+			} 
+		
+		}		
+		
+		
+			
+		//Crédito: Essa operação deverá adicionar ao saldo da pessoa o valor informado na requisição.
+		public function setCredito(Conta $conta, $valor){
+			
+			if($saldo = $this->existsContaRetornaSaldo($conta->getNumero())){
+				
+				$novoSaldo = $saldo;
+				$novoSaldo += $valor;
+
+				return $novoSaldo;
+			}		
+			
+		}
 
 
         //Transferências: Essa operação deverá realizar o débito do saldo de uma pessoa e realizar um crédito na outra pessoa.        
@@ -317,27 +350,29 @@
             }
 
         } 
-		*/
+		
 
 	}
 
-	$cliente = new Cliente;
-	$cliente->setNome('Maria da Silva');
+	//$cliente = new Cliente;
+	///$cliente->setNome('Maria da Silva');
 	//$cliente->setCpf('18194230202');
-	// $conta = new Conta;
-	// $conta->setNumero('1278');
+	 $conta = new Conta;
 	// $dataAtual = date('y-m-d');
 	// $conta->setDataCadastro($dataAtual);
 	// $conta->setSaldo(8500.01);
 	//$conta = new Conta;
-	//$conta->setNumero('2928-1');
+	$conta->setNumero('1923-7');
 	
 	$objet = new ContaController;
 	
 	//$res = $objet->listar();
 	//$res = $objet->buscarContaPorCpf($cliente->getCpf());
 	///$res = $objet->buscarContaPorNumero($conta->getNumero());
-	$res = $objet->buscarClientePorNome($cliente->getNome());
+	//$res = $objet->buscarClientePorNome($cliente->getNome());
+	//$res = $objet->existsConta($conta);
+	//$res = $objet->existsContaRetornaSaldo($conta->getNumero());
+	$res = $objet->setCredito($conta, 120000.09);
 	echo $res;
 	
 ?>

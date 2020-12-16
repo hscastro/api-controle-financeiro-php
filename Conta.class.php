@@ -39,7 +39,7 @@
         public function getSaldo($cpf){
             if(existCliente()){
 
-                if($this->saldo > 0){
+                if($this->saldo > 0.01){
                 
                     return $this->saldo;
     
@@ -79,10 +79,7 @@
 
         }
         
-        //Crédito: Essa operação deverá adicionar ao saldo da pessoa o valor informado na requisição.
-        public function setCredito($numero, $valor){
-            $this->saldo += $valor;
-        }
+
 
         public function getCredito(){
             $this->saldo;
