@@ -39,3 +39,7 @@ INSERT INTO tb_contas(numero,datacadastro, valor, cliente_id)values('3921-8','20
 INSERT INTO tb_clientes(nome, cpf, datanascimento, email)values('Maria da Silva','98194230345' ,'2019-07-29', 'maria.s@gmail.com');
 
 INSERT INTO tb_contas(numero,datacadastro, valor, cliente_id)values('9342-5','2020-12-15', 1140.52, 3);
+
+
+
+UPDATE tb_contas SET valor=6800 WHERE id=5 AND numero='1923-2';

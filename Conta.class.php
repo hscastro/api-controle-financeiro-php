@@ -14,6 +14,13 @@
 
         private $dataCadastro;
 
+        public function setId($id){
+            $this->id = $id;
+        }
+
+        public function getId(){
+            return $this->id;
+        }
 
         public function setNumero($numero){
             $this->numero = $numero;
@@ -27,6 +34,10 @@
             $this->saldo = $saldo;
         }
 
+        public function getSaldo(){
+            return $this->saldo;
+        }
+
         public function setDataCadastro($dataCadastro){
             $this->dataCadastro = $dataCadastro;
         }
@@ -36,7 +47,7 @@
         }
 
         //Saldo: Deverá retornar o saldo de uma pessoa.
-        public function getSaldo($cpf){
+        public function retornoSaldo($cpf){
             if(existCliente()){
 
                 if($this->saldo > 0.01){
@@ -73,12 +84,7 @@
         public function getExtrato($numero){
             return null;
 		}
-		
-        //Débito: Essa operação deverá retirar do saldo de uma pessoa o valor informado na requisição.
-        public function setDebito($numero, $valor){
-
-        }
-        
+	      
 
 
         public function getCredito(){

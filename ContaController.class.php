@@ -78,29 +78,25 @@
 			}else{
 				echo 'Erro na exclusão!';
 			}		
-		}
+		}*/
 
 
 		//método para atualização de um cliente no banco de dados
-		public function editar(Cliente $cliente){
-			$update = 'UPDATE tb_clientes SET nome=:nome, cpf=:cpf, dataNascimento=:dataNascimento,
-			 		email=:email WHERE id = :id';
+		public function editar(Conta $conta){
+			$update = 'UPDATE tb_contas SET VALOR=:valor WHERE ID = :id AND NUMERO=:numero';
 			$stmt = NULL;
 			$stmt = $this->conn->prepare($update);
 						 
-			$id = $cliente->getId();
-			$nome = $cliente->getNome();
-			$cpf = $cliente->getCpf();
-			$dataNascimento = $cliente->getDataNascimento();
-			$email = $cliente->getEmail();
-			 
-			$stmt->bindParam(':nome', $nome);
-			$stmt->bindParam(':cpf', $cpf);
-			$stmt->bindParam(':dataNascimento', $dataNascimento);
-			$stmt->bindParam(':email', $email);	
-			$stmt->bindParam(':id', $id, PDO::PARAM_INT);
-			$stmt->execute();
+			$id = $conta->getId();
+			$numero = $conta->getNumero();
+			$valor = $conta->getSaldo();			 
 			
+			$stmt->bindParam('numero', $numero);
+			$stmt->bindParam(':valor', $valor);
+			$stmt->bindParam(':id', $id, PDO::PARAM_INT);	
+			
+			$stmt->execute();
+						
 			$this->conn = NULL;
 
 			if($stmt != NULL){
@@ -108,7 +104,7 @@
 			}else{
 				echo 'Erro na atualizado!';
 			}		
-		}*/
+		}
 
 		public function listar(){
 		   //sql para selecionar todos os clientes da base dados
@@ -291,23 +287,31 @@
 		//retorno os dados uma conta a partir do numero do 'CPF' do cliente
 		public function existsContaRetornaSaldo($numero){
 			//sql para selecionar todos os clientes da base dados
-			$sql = "SELECT * FROM tb_contas AS c1 INNER JOIN  tb_clientes AS c2 
-							ON c1.cliente_id = c2.id AND c1.numero ='$numero'";
+			$sql = "SELECT c1.ID as id, c1.NUMERO as numero, c1.DATACADASTRO as data, c1.VALOR as valor 
+					FROM tb_contas AS c1 INNER JOIN  tb_clientes AS c2 
+					ON c1.cliente_id = c2.id AND c1.numero ='$numero'";
 		
 
 			$stmt = $this->conn->prepare($sql);		   
 			$stmt->execute();
+			$ID = 0;
 			$NUMERO = 0;
 			$SALDO = 0;
 			 
 			//percorre a lista de registros cadastro no banco de dados
 			while($rows = $stmt->fetch(PDO::FETCH_ASSOC)) {
-				   $NUMERO = $rows['NUMERO'];
-				   $SALDO = $rows['VALOR'];
+				   $ID = $rows['id'];
+				   $NUMERO = $rows['numero'];
+				   $SALDO = $rows['valor'];
 			}
 
-			if($numero === $NUMERO){		
-				return $SALDO;
+			if($numero === $NUMERO){	
+				$newObjet = new Conta;
+				$newObjet->setId($ID);
+				$newObjet->setNumero($NUMERO);
+				$newObjet->setSaldo($SALDO);
+
+				return $newObjet;
 			} 
 		
 		}		
@@ -316,17 +320,50 @@
 			
 		//Crédito: Essa operação deverá adicionar ao saldo da pessoa o valor informado na requisição.
 		public function setCredito(Conta $conta, $valor){
+			//$retorno = new Conta;
+			$retorno = $this->existsContaRetornaSaldo($conta->getNumero());
 			
-			if($saldo = $this->existsContaRetornaSaldo($conta->getNumero())){
+			if($retorno->getNumero() == $conta->getNumero()){
 				
-				$novoSaldo = $saldo;
+				$novoSaldo = $retorno->getSaldo();
 				$novoSaldo += $valor;
+				//update na base de dados da api
+				$conta->setSaldo($novoSaldo);
+				$this->editar($conta);				
 
-				return $novoSaldo;
+				echo 'Operação realizada com sucesso.';
+
+			}else{
+				echo 'Erro [XXXX] na operaçção, favor procurar informações com a gerência da agência';
 			}		
 			
 		}
 
+
+        //Débito: Essa operação deverá retirar do saldo de uma pessoa o valor informado na requisição.
+        public function setDebito(Conta $conta, $valor){
+			//$retorno = new Conta;
+			$retorno = $this->existsContaRetornaSaldo($conta->getNumero());
+			
+			if($retorno->getNumero() == $conta->getNumero()){
+
+					if($retorno->getSaldo() >= $valor){
+						echo 'ID '.$retorno->getId();
+						$novoSaldo = $retorno->getSaldo();
+						$novoSaldo -= $valor;
+						//update na base de dados da api
+						$conta->setSaldo($novoSaldo);
+						$this->editar($conta);
+
+						echo 'Operação realizada com sucesso.';
+
+					}	
+
+				
+			}else{
+				echo 'Erro [XXXX] na operaçção, favor procurar informações com a gerência da agência';
+			}
+        }		
 
         //Transferências: Essa operação deverá realizar o débito do saldo de uma pessoa e realizar um crédito na outra pessoa.        
         public function setTransferencias($numeroContaDebitada, $numeroContaBeneciado, $valor){
@@ -362,7 +399,8 @@
 	// $conta->setDataCadastro($dataAtual);
 	// $conta->setSaldo(8500.01);
 	//$conta = new Conta;
-	$conta->setNumero('1923-7');
+	$conta->setNumero('1923-2');
+	$valor = 2000.00;
 	
 	$objet = new ContaController;
 	
@@ -372,7 +410,8 @@
 	//$res = $objet->buscarClientePorNome($cliente->getNome());
 	//$res = $objet->existsConta($conta);
 	//$res = $objet->existsContaRetornaSaldo($conta->getNumero());
-	$res = $objet->setCredito($conta, 120000.09);
+	//$res = $objet->setCredito($conta, 1000.07);
+	$res = $objet->setDebito($conta, $valor);
 	echo $res;
 	
 ?>
