@@ -83,26 +83,29 @@
 
 		//método para atualização de um cliente no banco de dados
 		public function editar(Conta $conta){
-			$update = 'UPDATE tb_contas SET VALOR=:valor WHERE ID = :id AND NUMERO=:numero';
+			
+			$update = 'UPDATE tb_contas SET VALOR=:valor WHERE ID=:id AND NUMERO=:numero';
+			
 			$stmt = NULL;
 			$stmt = $this->conn->prepare($update);
-						 
+					 
 			$id = $conta->getId();
-			$numero = $conta->getNumero();
+			$numero = $conta->getNumero();			
 			$valor = $conta->getSaldo();			 
 			
-			$stmt->bindParam('numero', $numero);
+			$stmt->bindParam(':numero', $numero);			
 			$stmt->bindParam(':valor', $valor);
 			$stmt->bindParam(':id', $id, PDO::PARAM_INT);	
-			
 			$stmt->execute();
-						
+									
 			$this->conn = NULL;
 
 			if($stmt != NULL){
-				echo 'Registro atualizado com sucesso!';
+				
+				return true;
+				
 			}else{
-				echo 'Erro na atualizado!';
+				return false;	
 			}		
 		}
 
@@ -287,8 +290,8 @@
 		//retorno os dados uma conta a partir do numero do 'CPF' do cliente
 		public function existsContaRetornaSaldo($numero){
 			//sql para selecionar todos os clientes da base dados
-			$sql = "SELECT c1.ID as id, c1.NUMERO as numero, c1.DATACADASTRO as data, c1.VALOR as valor 
-					FROM tb_contas AS c1 INNER JOIN  tb_clientes AS c2 
+			$sql = "SELECT c1.ID as id, c1.NUMERO as numero,  
+					c1.VALOR as valor FROM tb_contas AS c1 INNER JOIN  tb_clientes AS c2 
 					ON c1.cliente_id = c2.id AND c1.numero ='$numero'";
 		
 
@@ -324,14 +327,19 @@
 			$retorno = $this->existsContaRetornaSaldo($conta->getNumero());
 			
 			if($retorno->getNumero() == $conta->getNumero()){
+				$saldo = $retorno->getSaldo();
+				$saldo += $valor;
 				
-				$novoSaldo = $retorno->getSaldo();
-				$novoSaldo += $valor;
 				//update na base de dados da api
-				$conta->setSaldo($novoSaldo);
-				$this->editar($conta);				
+				$retorno->setSaldo($saldo);
+				$result = false;
+				$result = $this->editar($retorno);
 
-				echo 'Operação realizada com sucesso.';
+				if($result){
+					echo 'Operação [CRÉDITO] realizada com sucesso.';
+				}else{
+					echo 'Erro na operação.';
+				}				
 
 			}else{
 				echo 'Erro [XXXX] na operaçção, favor procurar informações com a gerência da agência';
@@ -346,22 +354,30 @@
 			$retorno = $this->existsContaRetornaSaldo($conta->getNumero());
 			
 			if($retorno->getNumero() == $conta->getNumero()){
-
-					if($retorno->getSaldo() >= $valor){
-						echo 'ID '.$retorno->getId();
-						$novoSaldo = $retorno->getSaldo();
+					///$id = $retorno->getId();
+					$saldo = $retorno->getSaldo();
+					
+					if($valor <= $saldo){
+						$novoSaldo = $saldo;
 						$novoSaldo -= $valor;
+						
 						//update na base de dados da api
-						$conta->setSaldo($novoSaldo);
-						$this->editar($conta);
+						$retorno->setSaldo($novoSaldo);
+						$result = false;
+						$result = $this->editar($retorno);
 
-						echo 'Operação realizada com sucesso.';
-
+						if($result){
+							echo 'Operação [DÉDITO] realizada com sucesso.';
+						}else{
+							echo 'Erro na operação.';
+						}
+					}else{
+						echo 'Valor maior que saldo em conta.';
 					}	
 
 				
 			}else{
-				echo 'Erro [XXXX] na operaçção, favor procurar informações com a gerência da agência';
+				echo 'Conta inexistente, favor procurar informações com a gerência da agência';
 			}
         }		
 
@@ -399,8 +415,9 @@
 	// $conta->setDataCadastro($dataAtual);
 	// $conta->setSaldo(8500.01);
 	//$conta = new Conta;
+	//$conta->setId(5);
 	$conta->setNumero('1923-2');
-	$valor = 2000.00;
+	$valor = 100.00;
 	
 	$objet = new ContaController;
 	
@@ -410,9 +427,9 @@
 	//$res = $objet->buscarClientePorNome($cliente->getNome());
 	//$res = $objet->existsConta($conta);
 	//$res = $objet->existsContaRetornaSaldo($conta->getNumero());
-	//$res = $objet->setCredito($conta, 1000.07);
-	$res = $objet->setDebito($conta, $valor);
+	$res = $objet->setCredito($conta, $valor);
+	//$res = $objet->setDebito($conta, $valor);
+	//$res = $objet->editar($conta);
 	echo $res;
-	
 ?>
 
