@@ -21,6 +21,7 @@
 	$tester = new ClienteService;
     $res = $tester->listarTodos();
     echo $res;
+    
     //$cl1 = new Cliente;
     
      //$nome = 'Pedro Lucas Almeida';   

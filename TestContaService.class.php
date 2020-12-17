@@ -32,9 +32,9 @@
 
     $valor = 200.00;
     
-	$res = $tester->setTransferencias($c1,$c2, $valor);
+	//$res = $tester->setTransferencias($c1,$c2, $valor);
     
-    echo $res;
+    //echo $res;
 	//$cliente = new Cliente;
 	///$cliente->setNome('Maria da Silva');
 	//$cliente->setCpf('18194230202');
@@ -47,9 +47,10 @@
 	//$conta->setNumero('1923-2');
 	//$valor = 500.00;
 	
-	//$objet = new ContaController;
+	$objet = new ContaController;
 	
-	//$res = $objet->listar();
+	$res = $objet->listar();
+	echo $res;
 	//$res = $objet->buscarContaPorCpf($cliente->getCpf());
 	///$res = $objet->buscarContaPorNumero($conta->getNumero());
 	//$res = $objet->buscarClientePorNome($cliente->getNome());
