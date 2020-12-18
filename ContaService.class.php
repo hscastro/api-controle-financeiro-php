@@ -33,11 +33,15 @@
 			return $this->service->listar();
 		}
 
+		public function setDebitoConta($conta, $valor){
+			return $this->service->setDebito($conta, $valor);
+		}
+
 		public function setCreditoConta($conta, $valor){
 			return $this->service->setCredito($conta, $valor);
 		}
 
-		public function setTransferencias($conta1,$conta2, $valor){
+		public function setTransferencias($conta1, $conta2, $valor){
 			return $this->service->setTransferencias($conta1, $conta2, $valor);
 		}
 
