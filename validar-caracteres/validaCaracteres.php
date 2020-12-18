@@ -3,10 +3,9 @@
 	//email: halisonsc5@gmail.com
 	//Data:16/12/2020 as 14:00 - 16:20
     //http://github.com/hscastro
-    
-        //$str = "({[()]})"; 
-        $str = "[{()}][(){}]";        
-        //$str = "{[]}";  tamanho 4 / 2 = 2
+
+
+    function validaCaracteres($str){
         //$padrao = "/^[a-z0-9]{1,4}$/i";  
         $padrao = "/^[{\[\(]{1,7}+[)\]\}]{1,7}$/i"; 
         $tamnho = strlen($str);
@@ -15,9 +14,9 @@
         $s2;
         
         if($tamnho%2==1){
-            echo 'Invalido!';
-            echo "<hr>";
-            echo $str;               
+        
+            return false;
+            
         }else{
 
             if(preg_match($padrao, $str)) {
@@ -33,17 +32,28 @@
                 $s1 = $s1.$s2;
 
                 if($s1 === $str){
-                   echo 'válido!';
-                   echo "<hr>";
-                   echo $str;   
+                    return true;   
                 }
-
             }
 
-            echo 'válido!';
-            echo "<hr>";
-            echo $str;        
+            return true;       
         }
-   
+    }
+
+    //$str = "({[()]})"; 
+    $string_ = "[{()}][(){}]"; 
+    $retorno = validaCaracteres($string_);
+
+    if($retorno){
+        echo 'válido!';
+        echo "<hr>";
+        echo $string_; 
+        
+    }else{
+        echo 'Invalido!';
+        echo "<hr>";
+        echo $string_;        
+    }
+       
     
 ?>
