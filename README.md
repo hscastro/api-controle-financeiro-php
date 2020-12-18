@@ -1,5 +1,11 @@
 # api-controle-financeiro
 
+
+# validar-caracteres
+
+# aplicação-cliente
+
+
 <h3>Funcionalidades</h3>
 
 <li>Saldo: Deverá retornar o saldo de uma pessoa.</li>
